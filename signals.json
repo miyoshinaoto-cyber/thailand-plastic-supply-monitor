@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": null,
+  "placeholder": true,
+  "message": "Placeholder. The first GitHub Actions run will populate this with real RSS data.",
+  "summary": {
+    "queriesPlanned": 30,
+    "feedsOk": 0,
+    "feedsFailed": 0,
+    "uniqueItems": 0,
+    "activeSignals": 0,
+    "highSignals": 0,
+    "mediumSignals": 0,
+    "droppedLowQuality": 0,
+    "droppedNearDuplicates": 0
+  },
+  "feedReport": [],
+  "items": []
+}
