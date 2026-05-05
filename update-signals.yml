@@ -1,0 +1,52 @@
+name: Update signals
+
+# Refreshes data/signals.json from public Google News RSS feeds.
+# Runs once per day at 07:00 Thailand time, and on manual dispatch.
+
+on:
+  schedule:
+    # 00:00 UTC = 07:00 Asia/Bangkok (UTC+7). GitHub Actions cron is UTC only.
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-signals
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run RSS fetcher
+        # The script uses only Python's standard library — no pip install needed.
+        # It is tolerant of partial feed failures: it only exits non-zero when
+        # 100% of feeds fail. We ignore that case so we don't churn commits.
+        run: |
+          python scripts/fetch_rss.py || echo "fetch_rss.py reported all-feeds-failed; keeping previous data/signals.json"
+
+      - name: Commit updated data/signals.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- data/signals.json; then
+            echo "No changes to data/signals.json — nothing to commit."
+            exit 0
+          fi
+
+          git add data/signals.json
+          git commit -m "chore(data): refresh signals.json $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
